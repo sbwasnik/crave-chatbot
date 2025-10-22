@@ -6,3 +6,4 @@ tabulate
 docx2txt
 langchain
 hdbcli
+langchain.chains

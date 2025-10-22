@@ -1,0 +1,7 @@
+streamlit
+pypdf
+langchain_community
+langchain_openai
+tabulate
+docx2txt
+hdbcli

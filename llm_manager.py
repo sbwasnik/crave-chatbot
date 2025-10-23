@@ -65,40 +65,25 @@ def generate_clarifying_questions(prompt: str, history: List[Dict[str, str]], do
     2.  The full Chat History.
     3.  Whether a document is currently loaded (`document_is_loaded`: {document_is_loaded}).
 
-    **Your Goal:** Decide if the question is too vague and needs clarification.
+    **Your Goal:** Decide if the question is too vague and needs clarification before it can be answered well.
 
     **--- PRIMARY RULE ---**
     Your **FIRST** task is to check if the chat history *already contains* the information to answer the latest question.
     - If the answer is present in the history, clarification is **NEVER** needed.
 
-    **Example (History contains answer):**
-    -   History: [{{"role": "user", "content": "My name is Subodh Wasnik"}}]
-    -   Latest Question: "What is my name?"
-    -   Your JSON Output: {{"clarification_needed": false, "questions": []}}
-
-    **Example (History contains answer):**
-    -   History: [{{"role": "user", "content": "I work at Crave Infotech"}}]
-    -   Latest Question: "Where do I work?"
-    -   Your JSON Output: {{"clarification_needed": false, "questions": []}}
-
     **--- SCENARIO 1: A document IS loaded (`document_is_loaded`: true) ---**
     (If primary rule does not apply)
-    -   Assume the user's question is ABOUT THE DOCUMENT.
-    -   Broad questions like "Summarize this," or "What are the main points?" are VALID and do NOT need clarification.
-    -   Only generate clarifying questions if the prompt is extremely ambiguous (e.g., "why?") or clearly unrelated (e.g., "What's the best car?").
-    -   **Example (Doc Loaded):**
-        -   History: []
-        -   Latest Question: "Summarize."
-        -   Your JSON Output: {{"clarification_needed": false, "questions": []}}
+    -   **Step 1: Classify the question.** Is it about the *specific content* of the document (e.g., "Summarize this," "What is the `process_document` function?") OR is it a *general knowledge* question related to the document's topic (e.g., "How do I learn Python?", "What is Streamlit?")?
+    
+    -   **Step 2: Apply rules based on classification.**
+        -   **If about document content:** These questions are usually valid. Broad questions like "Summarize this," or "What are the main points?" are VALID and do NOT need clarification.
+        
+        -   **If general knowledge:** Treat this question *exactly* like SCENARIO 2. Analyze it for vagueness, *ignoring the document*. A broad, open-ended question that needs personalization IS vague.
 
     **--- SCENARIO 2: NO document is loaded (`document_is_loaded`: false) ---**
     (If primary rule does not apply)
     -   Analyze the question for general vagueness.
-    -   If the question is vague (e.g., "What's the best car?") and the history doesn't provide context (like budget), then clarification IS needed.
-    -   **Example (No Doc):**
-        -   History: []
-        -   Latest Question: "What's the best car?"
-        -   Your JSON Output: {{"clarification_needed": true, "questions": ["What is your budget?", "What is the primary use (e.g., family, commute)?"]}}
+    -   If the question is broad, open-ended, or requires personalization (like advice, recommendations, or learning plans) and the history doesn't provide context, then clarification IS needed.
 
     **Your Response:**
     Respond ONLY with a JSON object in the specified format:

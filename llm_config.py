@@ -100,10 +100,22 @@ def get_hana_connection() -> dbapi.Connection:
             address=str(HANA_ADDRESS),
             port=int(HANA_PORT),
             user=str(HANA_USER),
-            password=str(HANA_PASSWORD)
-            )
+            password=str(HANA_PASSWORD),
+            encrypt=True,  # <-- ADDED: Assume SSL is required for port 443
+            sslValidateCertificate=True # <-- ADDED: Standard security
+        )
     except Exception as e:
-        st.error(f"HANA Connection Error: {e}")
+        # Provide more specific advice for this common error
+        if "Socket closed by peer" in str(e) or "89013" in str(e):
+             st.error(
+                f"HANA Connection Error: {e}\n\n"
+                "This 'Socket closed by peer' error often means:\n"
+                "1.  **Firewall/IP Allow-listing:** The IP address of this app is not on the HANA Cloud instance's allow-list.\n"
+                "2.  **Credentials:** Your HANA_USER or HANA_PASSWORD in secrets.toml might be incorrect.\n"
+                "3.  **HANA Instance:** The HANA instance may be stopped or restarting."
+            )
+        else:
+            st.error(f"HANA Connection Error: {e}")
         raise
 
 def get_vector_store(embedding_model: AzureOpenAIEmbeddings, connection: dbapi.Connection) -> HanaDB:

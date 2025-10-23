@@ -129,4 +129,5 @@ def delete_hana_context(chat_id: str):
         vector_store.delete(filter={"chat_id": chat_id})
         st.toast(f"Deleted context for chat from HANA.", icon="🗑️")
     except Exception as e:
-        st.error(f"Error deleting context from HANA: {e}")
+        # MODIFIED: Don't crash the app, just log the error to the Streamlit UI
+        st.warning(f"Warning: Could not delete old context from HANA: {e}", icon="⚠️")
